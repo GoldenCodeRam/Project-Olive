@@ -1,16 +1,26 @@
 <template>
   <div class="container">
     <p>{{ title }}</p>
-    <input type="text" :placeholder="`You should put your ${title} here...`" />
+    <input
+      type="text"
+      :placeholder="`You should put your ${title} here...`"
+      @input="$emit('update:textInput', $event.target.value)"
+    />
   </div>
 </template>
 
 <script>
+let inputContent;
+
 export default {
   props: {
-    title: String
-  }
+    title: String,
+    textInput: String
+  },
+  emits: ["update:textInput"]
 };
+
+export { inputContent };
 </script>
 
 <style lang="scss" scoped>

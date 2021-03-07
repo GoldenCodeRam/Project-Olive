@@ -4,12 +4,16 @@
     <div class="flexInputContainer">
       <div class="inputContainer">
         <p class="title">Insert information</p>
-        <text-input title="Name"></text-input>
+        <text-input title="Name" v-model:textInput="nameTextInput"></text-input>
         <text-input title="Favorite game"></text-input>
         <text-input title="Favorite food"></text-input>
-        <custom-button text="Send" imageClass="fas fa-paper-plane"></custom-button>
+        <custom-button
+          v-on:click="sendInformationToMiddleware"
+          text="Send"
+          imageClass="fas fa-paper-plane"
+        />
       </div>
-    </div> 
+    </div>
     <div class="infoContainer">
       <p class="title">Insert information</p>
     </div>
@@ -17,18 +21,30 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { ref } from "vue";
 import CustomButton from "./components/CustomButton.vue";
 import LogoBar from "./components/LogoBar.vue";
 import TextInput from "./components/TextInput.vue";
 
-export default defineComponent({
+export default {
   components: {
     LogoBar,
     TextInput,
     CustomButton
+  },
+  data() {
+    const nameTextInput = ref<string>();
+
+    function sendInformationToMiddleware() {
+      console.log(nameTextInput.value);
+    }
+
+    return {
+      sendInformationToMiddleware,
+      nameTextInput
+    };
   }
-});
+};
 </script>
 
 <style lang="scss">
