@@ -10,9 +10,6 @@ export default {
   props: {
     text: String,
     imageClass: String
-  },
-  setup(props) {
-    console.log(props.src);
   }
 };
 </script>

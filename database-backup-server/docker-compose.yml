@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  web:
+    build: .
+    ports:
+      - "8083:8083"
+  mongo_backup:
+    image: "mongo"
+    restart: always
+    ports:
+      - "8084:27017"

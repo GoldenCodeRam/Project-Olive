@@ -4,22 +4,41 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
+var MongoDatabase_1 = __importDefault(require("./MongoDatabase"));
+var DatabaseMonitor_1 = __importDefault(require("./DatabaseMonitor"));
 var Middleware = /** @class */ (function () {
     function Middleware() {
         this._application = express_1.default();
+        this._mongoDatabase = new MongoDatabase_1.default();
+        this._databaseMonitor = new DatabaseMonitor_1.default();
+        this._databaseMonitor.startMonitoring();
         this._application.use(express_1.default.json());
+        this._application.use(function (request, response, next) {
+            response.setHeader('Access-Control-Allow-Origin', '*');
+            response.setHeader('Access-Control-Allow-Headers', '*');
+            next();
+        });
         this.setGetMethods();
         this.setPostMethods();
-        this._application.listen(8081, function () {
-            console.log("Middleware running at localhost:8080");
+        this._application.listen(8082, function () {
+            console.log("Middleware running at localhost:8082");
         });
     }
     Middleware.prototype.setGetMethods = function () {
+        var _this = this;
+        this._application.get('/getInformation', function (request, response) {
+            console.log("Sending information to client...");
+            var databaseEntriesPromise = _this._mongoDatabase.getDatabaseEntries();
+            databaseEntriesPromise.then(function (entries) {
+                response.json(entries);
+            });
+        });
     };
     Middleware.prototype.setPostMethods = function () {
+        var _this = this;
         this._application.post('/sendInformation', function (request, response) {
-            console.log(request.headers);
-            console.log(request.body);
+            console.log("Getting information from client...");
+            _this._mongoDatabase.sendDatabaseEntry(request.body);
             response.sendStatus(200);
         });
     };

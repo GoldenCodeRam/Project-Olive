@@ -1,16 +1,16 @@
-import pymongo as pm
+from http.server import HTTPServer
+from package.server import Server
 
-from pymongo import database
+HOST_NAME = "0.0.0.0"
+SERVER_PORT = 8080
 
-database_client: pm.MongoClient = pm.MongoClient("mongodb://192.168.0.14:27017/", serverSelectionTimeoutMs=5000)
-database_client.start_session()
+# Entry point for the server
 
-test_database: database.Database = database_client.get_database("test-database")
-test_collection = test_database.get_collection("test-collection")
-test_collection.insert_one({"Test": 1})
-
-cursor = test_collection.find({})
-
-document: dict
-for document in cursor:
-  print(document.get("Test"))
+if __name__ == "__main__":
+  httpServer = HTTPServer((HOST_NAME, SERVER_PORT), Server)
+  print(f"Server started at http://{HOST_NAME}:{SERVER_PORT}")
+  try:
+    httpServer.serve_forever()
+  except KeyboardInterrupt:
+    httpServer.server_close()
+    print("Server stopped")

@@ -9,7 +9,7 @@
 .container {
   position: relative;
   width: 100%;
-  height: 28%;
+  height: 20%;
   background: #a0cc55;
   box-shadow: 0 2px 10px #698637;
   z-index: 999;
