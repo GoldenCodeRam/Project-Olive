@@ -40,80 +40,104 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose_1 = __importDefault(require("mongoose"));
-var MongoServer = /** @class */ (function () {
-    function MongoServer() {
+var MongoServer_1 = __importDefault(require("./MongoServer"));
+var MongoServerBackup = /** @class */ (function () {
+    function MongoServerBackup() {
         var _this = this;
         var _a;
-        this.MONGO_DB_URL = "mongodb://mongo:27017/userDatabase";
+        this.MONGO_DB_BACKUP_URL = "mongodb://172.18.0.1:8084/userDatabase";
         this._schema = new mongoose_1.default.Schema({
             name: String,
             game: String,
             food: String
         }, { versionKey: false });
+        this._mongoServer = new MongoServer_1.default();
         (_a = this.connectToDatabase()) === null || _a === void 0 ? void 0 : _a.then(function (mongoose) {
             _this._connection = mongoose;
+            _this.startBackupService();
         }, function (error) {
             console.log(error);
         });
     }
-    MongoServer.prototype.writeDocumentToDatabase = function (document) {
-        if (this._connection) {
-            var Model = this._connection.model("Model", this._schema);
-            Model.create({
-                name: document["name"],
-                game: document["game"],
-                food: document["food"]
-            }, function (error, doc) {
-                if (error)
-                    console.log(error);
-                console.log(doc);
-            });
-        }
-    };
-    MongoServer.prototype.getDocumentsFromDatabase = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var documentList, Model, _i, _a, document_1;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        documentList = [];
-                        if (!this._connection) return [3 /*break*/, 4];
-                        Model = this._connection.model("Model", this._schema);
-                        _i = 0;
-                        return [4 /*yield*/, Model.find()];
-                    case 1:
-                        _a = _b.sent();
-                        _b.label = 2;
-                    case 2:
-                        if (!(_i < _a.length)) return [3 /*break*/, 4];
-                        document_1 = _a[_i];
-                        documentList.push(document_1);
-                        _b.label = 3;
-                    case 3:
-                        _i++;
-                        return [3 /*break*/, 2];
-                    case 4: return [2 /*return*/, documentList];
-                }
-            });
-        });
-    };
-    MongoServer.prototype.connectToDatabase = function () {
-        return __awaiter(this, void 0, void 0, function () {
+    MongoServerBackup.prototype.startBackupService = function () {
+        var _this = this;
+        (function () { return __awaiter(_this, void 0, void 0, function () {
+            var _this = this;
             return __generator(this, function (_a) {
-                try {
-                    console.log("Trying to connect to local database...");
-                    return [2 /*return*/, mongoose_1.default.createConnection(this.MONGO_DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })];
-                }
-                catch (error) {
-                    this.handleError(error);
-                }
+                console.log("Making backup of the database...");
+                this._mongoServer.getDocumentsFromDatabase().then(function (documents) {
+                    _this.writeDocumentsToBackupDatabase(documents);
+                    setTimeout(function () { return _this.startBackupService(); }, 5000);
+                });
                 return [2 /*return*/];
             });
+        }); })();
+    };
+    MongoServerBackup.prototype.writeDocumentsToBackupDatabase = function (documents) {
+        if (this._connection) {
+            var Model_1 = this._connection.model("Model", this._schema);
+            var _loop_1 = function (index) {
+                Model_1.findByIdAndUpdate(documents[index]["_id"], documents[index], { useFindAndModify: false }).then(function (document) {
+                    if (!document) {
+                        Model_1.create({
+                            _id: documents[index]["_id"],
+                            name: documents[index]["name"],
+                            game: documents[index]["game"],
+                            food: documents[index]["food"]
+                        }, function (error, doc) {
+                            if (error)
+                                console.log(error);
+                            console.log(doc);
+                        });
+                    }
+                }, function (error) {
+                    console.log("Error: " + error);
+                });
+            };
+            for (var index in documents) {
+                _loop_1(index);
+            }
+        }
+    };
+    MongoServerBackup.prototype.getDocumentFromDatabase = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var documentList, Model, cursor, doc;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        documentList = [];
+                        if (!this._connection) return [3 /*break*/, 5];
+                        Model = mongoose_1.default.model("Model", this._schema);
+                        cursor = Model.find().cursor();
+                        return [4 /*yield*/, cursor.next()];
+                    case 1:
+                        doc = _a.sent();
+                        _a.label = 2;
+                    case 2:
+                        if (!(doc != null)) return [3 /*break*/, 5];
+                        documentList.push(doc);
+                        _a.label = 3;
+                    case 3: return [4 /*yield*/, cursor.next()];
+                    case 4:
+                        doc = _a.sent();
+                        return [3 /*break*/, 2];
+                    case 5: return [2 /*return*/, documentList];
+                }
+            });
         });
     };
-    MongoServer.prototype.handleError = function (error) {
+    MongoServerBackup.prototype.connectToDatabase = function () {
+        try {
+            console.log("Trying to connect to backup database...");
+            return mongoose_1.default.createConnection(this.MONGO_DB_BACKUP_URL, { useNewUrlParser: true, useUnifiedTopology: true });
+        }
+        catch (error) {
+            this.handleError(error);
+        }
+    };
+    MongoServerBackup.prototype.handleError = function (error) {
         console.log(error);
     };
-    return MongoServer;
+    return MongoServerBackup;
 }());
-exports.default = MongoServer;
+exports.default = MongoServerBackup;

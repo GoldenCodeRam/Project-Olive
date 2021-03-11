@@ -5,6 +5,7 @@
   "main": "./out/main.js",
   "scripts": {
     "start": "tsc && node out/main.js",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "LöwenHerz",

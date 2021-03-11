@@ -11,24 +11,36 @@ var MongoDatabase = /** @class */ (function () {
     function MongoDatabase() {
     }
     MongoDatabase.prototype.getDatabaseEntries = function () {
-        return axios_1.default.get(DATABASE_URL).then(function (response) {
-            return response.data;
-        });
+        try {
+            return axios_1.default.get(DATABASE_URL).then(function (response) {
+                return response.data;
+            }, function (error) {
+                console.log(error.code);
+            });
+        }
+        catch (exception) {
+            console.log(exception);
+        }
     };
     MongoDatabase.prototype.sendDatabaseEntry = function (entry) {
         var postObject = { "documents": [entry] };
-        axios_1.default({
-            method: "POST",
-            url: DATABASE_URL,
-            data: postObject,
-            headers: {
-                "Content-Type": "application/json"
-            }
-        }).then(function (response) {
-            console.log(response);
-        }, function (error) {
-            console.log(error);
-        });
+        try {
+            axios_1.default({
+                method: "POST",
+                url: DATABASE_URL,
+                data: postObject,
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }).then(function (response) {
+                console.log(response.status);
+            }, function (error) {
+                console.log(error.code);
+            });
+        }
+        catch (exception) {
+            console.log(exception);
+        }
     };
     return MongoDatabase;
 }());

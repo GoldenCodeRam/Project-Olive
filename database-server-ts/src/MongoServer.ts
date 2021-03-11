@@ -9,7 +9,7 @@ export default class MongoServer {
     food: String
   }, { versionKey: false });
 
-  private _connection: typeof mongoose | undefined;
+  private _connection: mongoose.Connection | undefined;
 
   constructor() {
     this.connectToDatabase()?.then((mongoose) => {
@@ -21,37 +21,47 @@ export default class MongoServer {
 
   public writeDocumentToDatabase(document: any) {
     if (this._connection) {
-      const Model = mongoose.model("Model", this._schema);
+      const Model = this._connection.model("Model", this._schema);
 
-      Model.create({
-        name: document["name"],
-        game: document["game"],
-        food: document["food"]
-      }, (error, doc) => {
-        if (error) console.log(error);
-        console.log(doc);
-      });
+      if (document["_id"]) {
+        Model.create({
+          _id: document["_id"],
+          name: document["name"],
+          game: document["game"],
+          food: document["food"]
+        }, (error: any, doc: any) => {
+          if (error) console.log(error);
+          console.log(doc);
+        });
+      } else {
+        Model.create({
+          name: document["name"],
+          game: document["game"],
+          food: document["food"]
+        }, (error, doc) => {
+          if (error) console.log(error);
+          console.log(doc);
+        });
+      }
     }
   }
 
-  public async getDocumentFromDatabase() {
+  public async getDocumentsFromDatabase() {
     const documentList = []
 
     if (this._connection) {
-      const Model = mongoose.model("Model", this._schema);
-      const cursor = Model.find().cursor();
-
-      for(let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
-        documentList.push(doc);
+      const Model = this._connection.model("Model", this._schema);
+      for (const document of await Model.find()) {
+        documentList.push(document);
       }
     }
     return documentList;
   }
 
-  private connectToDatabase() {
+  private async connectToDatabase() {
     try {
-      console.log("Trying to connect to database...");
-      return mongoose.connect(this.MONGO_DB_URL, {useNewUrlParser: true, useUnifiedTopology: true});
+      console.log("Trying to connect to local database...");
+      return mongoose.createConnection(this.MONGO_DB_URL, { useNewUrlParser: true, useUnifiedTopology: true });
     } catch (error) {
       this.handleError(error);
     }

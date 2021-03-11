@@ -2,7 +2,7 @@ import express from 'express';
 import MongoDatabase from './MongoDatabase';
 import DatabaseMonitor from './DatabaseMonitor';
 
-export default class Middleware {
+export default class MiddlewareServer {
   private _application: express.Express = express();
   private _mongoDatabase: MongoDatabase = new MongoDatabase();
 
@@ -30,9 +30,13 @@ export default class Middleware {
     this._application.get('/getInformation', (request, response) => {
       console.log("Sending information to client...")
       const databaseEntriesPromise = this._mongoDatabase.getDatabaseEntries();
-      databaseEntriesPromise.then((entries) => {
-        response.json(entries);
-      })
+      if (databaseEntriesPromise) {
+        databaseEntriesPromise.then((entries) => {
+          response.json( {documents: entries} );
+        })
+      } else {
+        response.sendStatus(500);
+      }
     })
   }
 

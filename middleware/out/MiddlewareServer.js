@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 var MongoDatabase_1 = __importDefault(require("./MongoDatabase"));
 var DatabaseMonitor_1 = __importDefault(require("./DatabaseMonitor"));
-var Middleware = /** @class */ (function () {
-    function Middleware() {
+var MiddlewareServer = /** @class */ (function () {
+    function MiddlewareServer() {
         this._application = express_1.default();
         this._mongoDatabase = new MongoDatabase_1.default();
         this._databaseMonitor = new DatabaseMonitor_1.default();
@@ -24,7 +24,7 @@ var Middleware = /** @class */ (function () {
             console.log("Middleware running at localhost:8082");
         });
     }
-    Middleware.prototype.setGetMethods = function () {
+    MiddlewareServer.prototype.setGetMethods = function () {
         var _this = this;
         this._application.get('/getInformation', function (request, response) {
             console.log("Sending information to client...");
@@ -39,7 +39,7 @@ var Middleware = /** @class */ (function () {
             }
         });
     };
-    Middleware.prototype.setPostMethods = function () {
+    MiddlewareServer.prototype.setPostMethods = function () {
         var _this = this;
         this._application.post('/sendInformation', function (request, response) {
             console.log("Getting information from client...");
@@ -47,6 +47,6 @@ var Middleware = /** @class */ (function () {
             response.sendStatus(200);
         });
     };
-    return Middleware;
+    return MiddlewareServer;
 }());
-exports.default = Middleware;
+exports.default = MiddlewareServer;

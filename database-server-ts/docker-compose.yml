@@ -1,9 +1,11 @@
 version: "3.9"
 services:
   main:
-    build: .
-    ports: 
+    image: "heizraum/project-olive-mongo-server:1.0.0"
+    ports:
       - "8081:8081"
+    environment:
+      - BACKUP_DATABASE_GATEWAY=$BACKUP_DATABASE_GATEWAY
   mongo:
     image: "mongo"
     ports:

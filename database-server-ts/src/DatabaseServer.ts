@@ -9,7 +9,7 @@ export default class DatabaseServer {
   private _application: express.Express = express();
   private _mongoServer: MongoServer = new MongoServer();
   private _mongoServerBackup: MongoServerBackup = new MongoServerBackup();
-  
+
   constructor() {
     this._application.use(express.json());
 
@@ -23,9 +23,8 @@ export default class DatabaseServer {
 
   private setGetMethods() {
     this._application.get('/', (request, response) => {
-      this._mongoServer.getDocumentFromDatabase().then((documentList) => {
+      this._mongoServer.getDocumentsFromDatabase().then((documentList) => {
         response.json(documentList);
-        response.sendStatus(200);
       }, (error) => {
         response.sendStatus(400);
       });

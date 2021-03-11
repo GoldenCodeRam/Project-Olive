@@ -1,3 +1,3 @@
-import Middleware from './Middleware';
+import MiddlewareServer from './MiddlewareServer';
 
-new Middleware();
+new MiddlewareServer();
